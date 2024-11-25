@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         // Set environment variables if needed
-        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk' // Update to your system's Java version
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-17' // Update to your system's Java path
+        PATH = "${env.PATH};${JAVA_HOME}\\bin"
     }
 
     stages {
@@ -17,21 +18,21 @@ pipeline {
         stage('Build') {
             steps {
                 // Clean and build the project using Maven
-                sh 'mvn clean install'
+                bat 'mvn clean install'
             }
         }
 
         stage('Test') {
             steps {
                 // Run unit tests
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
 
         stage('Package') {
             steps {
                 // Package the application (e.g., JAR or WAR)
-                sh 'mvn package'
+                bat 'mvn package'
             }
         }
 
