@@ -34,14 +34,16 @@ pipeline {
                 bat 'mvn package'
             }
         }
-
         stage('Run Application') {
             steps {
                 script {
-                    // Identify any existing process running the application and terminate it
-                    def pid = bat(returnStdout: true, script: 'netstat -ano | findstr :8080').trim()
+                    // Identify any existing process running on port 8080
+                    def pid = bat(returnStdout: true, script: '@netstat -ano | findstr :8080 || exit 0').trim()
                     if (pid) {
-                        bat "taskkill /PID ${pid} /F"
+                        echo "Found process: ${pid}"
+                        // Extract PID from the output and terminate it
+                        def processId = pid.tokenize()[-1] // Get the last column (PID)
+                        bat "taskkill /PID ${processId} /F"
                         echo 'Terminated existing application instance.'
                     } else {
                         echo 'No running instance found.'
