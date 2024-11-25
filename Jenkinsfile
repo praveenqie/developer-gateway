@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Set environment variables if needed
         JAVA_HOME = 'C:\\Program Files\\Java\\jdk-17' // Update to your system's Java path
         PATH = "${env.PATH};${JAVA_HOME}\\bin"
     }
@@ -36,10 +35,21 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Docker Build') {
             steps {
-                // Deploy the application (optional, depending on your setup)
-                echo 'Deploying the application...'
+                // Build a Docker image
+                bat 'docker build -t developer-gateway:latest .'
+            }
+        }
+
+        stage('Docker Run') {
+            steps {
+                // Stop any running container
+                bat 'docker stop developer-gateway || echo "No container to stop."'
+                bat 'docker rm developer-gateway || echo "No container to remove."'
+
+                // Run the Docker container
+                bat 'docker run -d -p 8080:8080 --name developer-gateway developer-gateway:latest'
             }
         }
     }
