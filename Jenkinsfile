@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-17' // Update to your system's Java path
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-17'
         PATH = "${env.PATH};${JAVA_HOME}\\bin"
     }
 
@@ -37,10 +37,20 @@ pipeline {
 
         stage('Run Application') {
             steps {
-                // Kill any running instance of the application
-                bat 'taskkill /F /IM java.exe || echo "No running application to stop."'
-                // Start the application
-                bat 'java -jar target\\your-app.jar'
+                script {
+                    // Identify any existing process running the application and terminate it
+                    def pid = bat(returnStdout: true, script: 'netstat -ano | findstr :8080').trim()
+                    if (pid) {
+                        bat "taskkill /PID ${pid} /F"
+                        echo 'Terminated existing application instance.'
+                    } else {
+                        echo 'No running instance found.'
+                    }
+
+                    // Start the application in the background
+                    bat 'start cmd /c "java -jar target\\developer-gateway-*.jar > log.txt 2>&1"'
+                    echo 'Application started successfully.'
+                }
             }
         }
     }
